@@ -25,7 +25,6 @@ export const SortableHeader = ({header}: SortableHeaderProps) => {
     });
 
     const isSortable = header.column.getCanSort();
-    console.log("=>(sortable-header.tsx:28) header", header);
     const width = header.getSize();
 
     const style = {
