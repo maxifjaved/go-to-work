@@ -4,4 +4,7 @@ import { DataTable } from "./table";
 import { columns } from "./columns";
 import { users } from "./data";
 
-export default () =>  <DataTable columns={columns} data={users} />
+const ListViewDataTable = () =>  <DataTable columns={columns} data={users} />
+
+
+export default ListViewDataTable;
