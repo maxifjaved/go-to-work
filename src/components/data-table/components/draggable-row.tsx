@@ -23,11 +23,12 @@ export function DraggableRow({ row }: DraggableRowProps) {
     });
 
     const style = {
-        transform: CSS.Transform.toString(transform),
+        transform: CSS.Translate.toString(transform),
         transition,
         opacity: isDragging ? 0.8 : 1,
         position: 'relative' as const,
-        zIndex: isDragging ? 1 : 0
+        zIndex: isDragging ? 1 : 0,
+        touchAction: 'none'
     };
 
     return (

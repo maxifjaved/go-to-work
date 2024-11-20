@@ -24,10 +24,12 @@ import {
     useSensors,
     PointerSensor,
     KeyboardSensor,
+    TouchSensor,
     closestCenter,
     DragEndEvent,
     DragStartEvent,
-    type UniqueIdentifier, DragOverlay,
+    type UniqueIdentifier,
+    DragOverlay,
 } from "@dnd-kit/core";
 import {
     SortableContext,
@@ -37,9 +39,9 @@ import {
 } from "@dnd-kit/sortable";
 import { restrictToHorizontalAxis, restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { ColumnManager } from "./components/column-manager";
-import { SortableHeader } from "./components/sortable-header";
 import { DragPreview } from "./components/drag-preview";
 import { DraggableRow } from "./components/draggable-row";
+import { SortableHeader } from "./components/sortable-header";
 
 interface DataTableProps<TValue> {
     columns: ColumnDef<User, TValue>[];
@@ -55,7 +57,9 @@ export function DataTable<TValue>({
     const [colSizing, setColSizing] = useState<ColumnSizingState>({});
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-    const [columnOrder, setColumnOrder] = useState<string[]>([]);
+    const [columnOrder, setColumnOrder] = useState<string[]>(() =>
+        columns.map(c => c.id!)
+    );
     const [activeHeader, setActiveHeader] = useState<Header<User, unknown> | null>(null);
 
     const dataIds = useMemo<UniqueIdentifier[]>(
@@ -69,6 +73,7 @@ export function DataTable<TValue>({
                 distance: 8,
             },
         }),
+        useSensor(TouchSensor),
         useSensor(KeyboardSensor)
     );
 
@@ -111,21 +116,11 @@ export function DataTable<TValue>({
 
         if (!over || active.id === over.id) return;
 
-        const oldIndex = table.getAllLeafColumns().findIndex(
-            (col) => col.id === active.id
-        );
-        const newIndex = table.getAllLeafColumns().findIndex(
-            (col) => col.id === over.id
-        );
+        const oldIndex = columnOrder.indexOf(active.id as string);
+        const newIndex = columnOrder.indexOf(over.id as string);
 
-        const newOrder = arrayMove(
-            table.getAllLeafColumns().map((col) => col.id),
-            oldIndex,
-            newIndex
-        );
-
-        setColumnOrder(newOrder);
-    }, [table]);
+        setColumnOrder(prevOrder => arrayMove(prevOrder, oldIndex, newIndex));
+    }, [columnOrder]);
 
     const handleRowDragEnd = useCallback((event: DragEndEvent) => {
         const { active, over } = event;
@@ -157,7 +152,7 @@ export function DataTable<TValue>({
                                 modifiers={[restrictToHorizontalAxis]}
                             >
                                 <SortableContext
-                                    items={headerGroup.headers.map((h) => h.id)}
+                                    items={columnOrder}
                                     strategy={horizontalListSortingStrategy}
                                 >
                                     <TableRow>
