@@ -37,7 +37,7 @@ export const SortableHeader = ({ header }: SortableHeaderProps) => {
     return (
         <TableHead
             ref={setNodeRef}
-            style={style}
+            style={{ ...style, transform: CSS.Transform.toString(transform), transition: isDragging ? 'none' : transition }}
             className={cn(
                 "relative",
                 isDragging && "z-50"

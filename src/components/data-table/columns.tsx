@@ -14,6 +14,14 @@ export type User = {
 
 export const columns: ColumnDef<User>[] = [
     {
+        id: "drag",
+        size: 50,
+        enableResizing: false,
+        enableSorting: false,
+        enableHiding: false,
+        header: () => null,
+    },
+    {
         accessorKey: "id",
         header: "Id",
         minSize: 50,

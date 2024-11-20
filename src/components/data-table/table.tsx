@@ -8,6 +8,7 @@ import {
     getSortedRowModel,
     useReactTable,
     Header,
+    Row,
 } from "@tanstack/react-table";
 import {
     Table,
@@ -26,50 +27,52 @@ import {
     KeyboardSensor,
     closestCenter,
     DragEndEvent,
-    DragStartEvent, DragOverlay,
+    DragStartEvent,
+    DragOverlay, defaultDropAnimationSideEffects,
 } from "@dnd-kit/core";
 import {
     SortableContext,
     horizontalListSortingStrategy,
+    verticalListSortingStrategy,
     arrayMove,
 } from "@dnd-kit/sortable";
-import {restrictToHorizontalAxis} from '@dnd-kit/modifiers';
+import {restrictToHorizontalAxis, restrictToVerticalAxis} from '@dnd-kit/modifiers';
 import {ColumnManager} from "./components/column-manager";
 import {SortableHeader} from "./components/sortable-header";
 import {DragPreview} from "./components/drag-preview";
+import {SortableRow} from "./components/sortable-row";
+import {GripVertical} from "lucide-react";
 
 interface DataTableProps<TValue> {
     columns: ColumnDef<User, TValue>[];
     data: User[];
+    onRowOrderChange?: (newData: User[]) => void;
 }
 
-export function DataTable<TValue>({columns, data}: DataTableProps<TValue>) {
+export function DataTable<TValue>({
+                                      columns,
+                                      data,
+                                      onRowOrderChange,
+                                  }: DataTableProps<TValue>) {
     const [colSizing, setColSizing] = useState<ColumnSizingState>({});
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [columnOrder, setColumnOrder] = useState<string[]>([]);
     const [activeHeader, setActiveHeader] = useState<Header<User, unknown> | null>(null);
+    const [activeRow, setActiveRow] = useState<Row<User> | null>(null);
+    const [rows, setRows] = useState(data);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
                 distance: 8,
-                delay: 100,
             },
         }),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: (event, args) => {
-                const header = args.context.active?.data.current?.header as Header<User, unknown>;
-                return {
-                    x: header ? header.getSize() / 2 : 0,
-                    y: 0,
-                };
-            },
-        })
+        useSensor(KeyboardSensor)
     );
 
     const table = useReactTable({
-        data,
+        data: rows,
         columns,
         enableColumnResizing: true,
         columnResizeMode: "onChange",
@@ -87,7 +90,7 @@ export function DataTable<TValue>({columns, data}: DataTableProps<TValue>) {
         },
     });
 
-    const handleDragStart = (event: DragStartEvent) => {
+    const handleHeaderDragStart = (event: DragStartEvent) => {
         const {active} = event;
         const header = table.getHeaderGroups()[0].headers.find(
             (h) => h.id === active.id
@@ -97,7 +100,7 @@ export function DataTable<TValue>({columns, data}: DataTableProps<TValue>) {
         }
     };
 
-    const handleDragEnd = (event: DragEndEvent) => {
+    const handleHeaderDragEnd = (event: DragEndEvent) => {
         const {active, over} = event;
 
         setActiveHeader(null);
@@ -122,6 +125,38 @@ export function DataTable<TValue>({columns, data}: DataTableProps<TValue>) {
         setColumnOrder(newOrder);
     };
 
+    const handleRowDragStart = (event: DragStartEvent) => {
+        const {active} = event;
+        const row = table.getRowModel().rows.find((r) => r.id === active.id);
+        if (row) {
+            setActiveRow(row);
+        }
+    };
+
+    const handleRowDragEnd = (event: DragEndEvent) => {
+        const {active, over} = event;
+
+        if (!over || active.id === over.id) {
+            setActiveRow(null);
+            return;
+        }
+
+        const rowsMap = table.getRowModel().rows.reduce((acc, row, index) => {
+            acc[row.id] = index;
+            return acc;
+        }, {} as { [key: string]: number });
+
+        const oldIndex = rowsMap[active.id.toString()];
+        const newIndex = rowsMap[over.id.toString()];
+
+        if (oldIndex !== undefined && newIndex !== undefined) {
+            const newRows = arrayMove([...rows], oldIndex, newIndex);
+            setActiveRow(null);
+            setRows(newRows);
+            onRowOrderChange?.(newRows);
+        }
+    };
+
     return (
         <div className="space-y-4">
             <div className="flex justify-end">
@@ -136,8 +171,8 @@ export function DataTable<TValue>({columns, data}: DataTableProps<TValue>) {
                                 key={headerGroup.id}
                                 sensors={sensors}
                                 collisionDetection={closestCenter}
-                                onDragStart={handleDragStart}
-                                onDragEnd={handleDragEnd}
+                                onDragStart={handleHeaderDragStart}
+                                onDragEnd={handleHeaderDragEnd}
                                 modifiers={[restrictToHorizontalAxis]}
                             >
                                 <SortableContext
@@ -145,6 +180,7 @@ export function DataTable<TValue>({columns, data}: DataTableProps<TValue>) {
                                     strategy={horizontalListSortingStrategy}
                                 >
                                     <TableRow>
+                                        <TableCell className="w-[50px]"/>
                                         {headerGroup.headers.map((header) => (
                                             <SortableHeader
                                                 key={header.id}
@@ -154,10 +190,7 @@ export function DataTable<TValue>({columns, data}: DataTableProps<TValue>) {
                                         ))}
                                     </TableRow>
                                 </SortableContext>
-                                <DragOverlay dropAnimation={{
-                                    duration: 150,
-                                    easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
-                                }}>
+                                <DragOverlay>
                                     {activeHeader ? (
                                         <DragPreview header={activeHeader}/>
                                     ) : null}
@@ -165,35 +198,75 @@ export function DataTable<TValue>({columns, data}: DataTableProps<TValue>) {
                             </DndContext>
                         ))}
                     </TableHeader>
-                    <TableBody>
-                        {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && "selected"}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragStart={handleRowDragStart}
+                        onDragEnd={handleRowDragEnd}
+                        modifiers={[restrictToVerticalAxis]}
+                    >
+                        <TableBody>
+                            <SortableContext
+                                items={table.getRowModel().rows.map((row) => row.id)}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                {table.getRowModel().rows?.length ? (
+                                    table.getRowModel().rows.map((row) => (
+                                        <SortableRow
+                                            key={row.id}
+                                            row={row}
+                                            columns={columns.length}
+                                        />
+                                    ))
+                                ) : (
+                                    <TableRow>
                                         <TableCell
-                                            key={cell.id}
-                                            style={{
-                                                width: cell.column.getSize(),
-                                                minWidth: cell.column.columnDef.minSize,
-                                                maxWidth: cell.column.columnDef.maxSize,
-                                            }}
+                                            colSpan={columns.length + 1}
+                                            className="h-24 text-center"
                                         >
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            No results.
                                         </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    No results.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
+                                    </TableRow>
+                                )}
+                            </SortableContext>
+                            <DragOverlay dropAnimation={{
+                                duration: 200,
+                                easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+                                sideEffects: defaultDropAnimationSideEffects({
+                                    styles: {
+                                        active: {
+                                            opacity: '0.5',
+                                        },
+                                    },
+                                }),
+                            }}>
+                                {activeRow ? (
+                                    <TableRow className="bg-muted/50 shadow-lg">
+                                        <TableCell className="w-[50px] p-2">
+                                            <div className="flex h-full items-center justify-center">
+                                                <GripVertical className="h-4 w-4"/>
+                                            </div>
+                                        </TableCell>
+                                        {activeRow.getVisibleCells().map((cell) => (
+                                            <TableCell
+                                                key={cell.id}
+                                                style={{
+                                                    width: cell.column.getSize(),
+                                                    minWidth: cell.column.columnDef.minSize,
+                                                    maxWidth: cell.column.columnDef.maxSize,
+                                                }}
+                                            >
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ) : null}
+                            </DragOverlay>
+                        </TableBody>
+                    </DndContext>
                 </Table>
             </div>
         </div>
