@@ -8,7 +8,6 @@ import {
     getSortedRowModel,
     useReactTable,
     Header,
-    Row,
 } from "@tanstack/react-table";
 import {
     Table,
@@ -17,8 +16,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import {User} from "./columns";
-import {useState} from "react";
+import { User } from "./columns";
+import { useCallback, useMemo, useState } from "react";
 import {
     DndContext,
     useSensor,
@@ -28,7 +27,7 @@ import {
     closestCenter,
     DragEndEvent,
     DragStartEvent,
-    DragOverlay, defaultDropAnimationSideEffects,
+    type UniqueIdentifier, DragOverlay,
 } from "@dnd-kit/core";
 import {
     SortableContext,
@@ -36,12 +35,11 @@ import {
     verticalListSortingStrategy,
     arrayMove,
 } from "@dnd-kit/sortable";
-import {restrictToHorizontalAxis, restrictToVerticalAxis} from '@dnd-kit/modifiers';
-import {ColumnManager} from "./components/column-manager";
-import {SortableHeader} from "./components/sortable-header";
-import {DragPreview} from "./components/drag-preview";
-import {SortableRow} from "./components/sortable-row";
-import {GripVertical} from "lucide-react";
+import { restrictToHorizontalAxis, restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { ColumnManager } from "./components/column-manager";
+import { SortableHeader } from "./components/sortable-header";
+import { DragPreview } from "./components/drag-preview";
+import { DraggableRow } from "./components/draggable-row";
 
 interface DataTableProps<TValue> {
     columns: ColumnDef<User, TValue>[];
@@ -59,8 +57,11 @@ export function DataTable<TValue>({
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [columnOrder, setColumnOrder] = useState<string[]>([]);
     const [activeHeader, setActiveHeader] = useState<Header<User, unknown> | null>(null);
-    const [activeRow, setActiveRow] = useState<Row<User> | null>(null);
-    const [rows, setRows] = useState(data);
+
+    const dataIds = useMemo<UniqueIdentifier[]>(
+        () => data.map(item => item.id.toString()),
+        [data]
+    );
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -72,7 +73,7 @@ export function DataTable<TValue>({
     );
 
     const table = useReactTable({
-        data: rows,
+        data,
         columns,
         enableColumnResizing: true,
         columnResizeMode: "onChange",
@@ -82,6 +83,7 @@ export function DataTable<TValue>({
         onSortingChange: setSorting,
         onColumnVisibilityChange: setColumnVisibility,
         onColumnOrderChange: setColumnOrder,
+        getRowId: row => row.id.toString(),
         state: {
             columnSizing: colSizing,
             sorting,
@@ -90,24 +92,24 @@ export function DataTable<TValue>({
         },
     });
 
-    const handleHeaderDragStart = (event: DragStartEvent) => {
-        const {active} = event;
+    const handleHeaderDragStart = useCallback((event: DragStartEvent) => {
+        const { active } = event;
         const header = table.getHeaderGroups()[0].headers.find(
             (h) => h.id === active.id
         );
         if (header) {
             setActiveHeader(header);
+            document.body.style.cursor = 'grabbing';
         }
-    };
+    }, [table]);
 
-    const handleHeaderDragEnd = (event: DragEndEvent) => {
-        const {active, over} = event;
+    const handleHeaderDragEnd = useCallback((event: DragEndEvent) => {
+        const { active, over } = event;
 
         setActiveHeader(null);
+        document.body.style.cursor = '';
 
-        if (!over || active.id === over.id) {
-            return;
-        }
+        if (!over || active.id === over.id) return;
 
         const oldIndex = table.getAllLeafColumns().findIndex(
             (col) => col.id === active.id
@@ -123,39 +125,18 @@ export function DataTable<TValue>({
         );
 
         setColumnOrder(newOrder);
-    };
+    }, [table]);
 
-    const handleRowDragStart = (event: DragStartEvent) => {
-        const {active} = event;
-        const row = table.getRowModel().rows.find((r) => r.id === active.id);
-        if (row) {
-            setActiveRow(row);
-        }
-    };
+    const handleRowDragEnd = useCallback((event: DragEndEvent) => {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
 
-    const handleRowDragEnd = (event: DragEndEvent) => {
-        const {active, over} = event;
+        const oldIndex = dataIds.indexOf(active.id);
+        const newIndex = dataIds.indexOf(over.id);
 
-        if (!over || active.id === over.id) {
-            setActiveRow(null);
-            return;
-        }
-
-        const rowsMap = table.getRowModel().rows.reduce((acc, row, index) => {
-            acc[row.id] = index;
-            return acc;
-        }, {} as { [key: string]: number });
-
-        const oldIndex = rowsMap[active.id.toString()];
-        const newIndex = rowsMap[over.id.toString()];
-
-        if (oldIndex !== undefined && newIndex !== undefined) {
-            const newRows = arrayMove([...rows], oldIndex, newIndex);
-            setActiveRow(null);
-            setRows(newRows);
-            onRowOrderChange?.(newRows);
-        }
-    };
+        const newData = arrayMove([...data], oldIndex, newIndex);
+        onRowOrderChange?.(newData);
+    }, [data, dataIds, onRowOrderChange]);
 
     return (
         <div className="space-y-4">
@@ -180,7 +161,7 @@ export function DataTable<TValue>({
                                     strategy={horizontalListSortingStrategy}
                                 >
                                     <TableRow>
-                                        <TableCell className="w-[50px]"/>
+                                        <TableCell className="w-[50px]" />
                                         {headerGroup.headers.map((header) => (
                                             <SortableHeader
                                                 key={header.id}
@@ -192,7 +173,7 @@ export function DataTable<TValue>({
                                 </SortableContext>
                                 <DragOverlay>
                                     {activeHeader ? (
-                                        <DragPreview header={activeHeader}/>
+                                        <DragPreview header={activeHeader} />
                                     ) : null}
                                 </DragOverlay>
                             </DndContext>
@@ -201,21 +182,19 @@ export function DataTable<TValue>({
                     <DndContext
                         sensors={sensors}
                         collisionDetection={closestCenter}
-                        onDragStart={handleRowDragStart}
                         onDragEnd={handleRowDragEnd}
                         modifiers={[restrictToVerticalAxis]}
                     >
                         <TableBody>
                             <SortableContext
-                                items={table.getRowModel().rows.map((row) => row.id)}
+                                items={dataIds}
                                 strategy={verticalListSortingStrategy}
                             >
                                 {table.getRowModel().rows?.length ? (
                                     table.getRowModel().rows.map((row) => (
-                                        <SortableRow
+                                        <DraggableRow
                                             key={row.id}
                                             row={row}
-                                            columns={columns.length}
                                         />
                                     ))
                                 ) : (
@@ -229,42 +208,6 @@ export function DataTable<TValue>({
                                     </TableRow>
                                 )}
                             </SortableContext>
-                            <DragOverlay dropAnimation={{
-                                duration: 200,
-                                easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
-                                sideEffects: defaultDropAnimationSideEffects({
-                                    styles: {
-                                        active: {
-                                            opacity: '0.5',
-                                        },
-                                    },
-                                }),
-                            }}>
-                                {activeRow ? (
-                                    <TableRow className="bg-muted/50 shadow-lg">
-                                        <TableCell className="w-[50px] p-2">
-                                            <div className="flex h-full items-center justify-center">
-                                                <GripVertical className="h-4 w-4"/>
-                                            </div>
-                                        </TableCell>
-                                        {activeRow.getVisibleCells().map((cell) => (
-                                            <TableCell
-                                                key={cell.id}
-                                                style={{
-                                                    width: cell.column.getSize(),
-                                                    minWidth: cell.column.columnDef.minSize,
-                                                    maxWidth: cell.column.columnDef.maxSize,
-                                                }}
-                                            >
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext()
-                                                )}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ) : null}
-                            </DragOverlay>
                         </TableBody>
                     </DndContext>
                 </Table>

@@ -1,18 +1,18 @@
-import { Header, Table as TableInstance, flexRender } from "@tanstack/react-table";
-import { User } from "../columns";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { cn } from "@/lib/utils";
-import { ArrowUpDown, ChevronDown, ChevronUp, GripHorizontal } from "lucide-react";
-import { TableHead } from "@/components/ui/table";
-import { ColumnResizer } from "../column-resizer";
+import {Header, Table as TableInstance, flexRender} from "@tanstack/react-table";
+import {User} from "../columns";
+import {useSortable} from "@dnd-kit/sortable";
+import {CSS} from "@dnd-kit/utilities";
+import {cn} from "@/lib/utils";
+import {ArrowUpDown, ChevronDown, ChevronUp, GripHorizontal} from "lucide-react";
+import {TableHead} from "@/components/ui/table";
+import {ColumnResizer} from "../column-resizer";
 
 interface SortableHeaderProps {
     header: Header<User, unknown>;
     table: TableInstance<User>;
 }
 
-export const SortableHeader = ({ header }: SortableHeaderProps) => {
+export const SortableHeader = ({header}: SortableHeaderProps) => {
     const {
         attributes,
         listeners,
@@ -25,6 +25,7 @@ export const SortableHeader = ({ header }: SortableHeaderProps) => {
     });
 
     const isSortable = header.column.getCanSort();
+    console.log("=>(sortable-header.tsx:28) header", header);
     const width = header.getSize();
 
     const style = {
@@ -37,7 +38,11 @@ export const SortableHeader = ({ header }: SortableHeaderProps) => {
     return (
         <TableHead
             ref={setNodeRef}
-            style={{ ...style, transform: CSS.Transform.toString(transform), transition: isDragging ? 'none' : transition }}
+            style={{
+                ...style,
+                transform: CSS.Transform.toString(transform),
+                transition: isDragging ? 'none' : transition
+            }}
             className={cn(
                 "relative",
                 isDragging && "z-50"
@@ -49,7 +54,7 @@ export const SortableHeader = ({ header }: SortableHeaderProps) => {
                     {...listeners}
                     className="cursor-grab touch-none p-1 rounded hover:bg-accent"
                 >
-                    <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+                    {header.id === 'drag' ? <div className={"border-l-2 border-red-600"}></div> :  <GripHorizontal className="h-4 w-4 text-muted-foreground"/>}
                 </div>
                 <div
                     className={cn(
@@ -66,18 +71,18 @@ export const SortableHeader = ({ header }: SortableHeaderProps) => {
                         <span className="ml-1">
                             {header.column.getIsSorted() ? (
                                 header.column.getIsSorted() === "asc" ? (
-                                    <ChevronUp className="h-4 w-4" />
+                                    <ChevronUp className="h-4 w-4"/>
                                 ) : (
-                                    <ChevronDown className="h-4 w-4" />
+                                    <ChevronDown className="h-4 w-4"/>
                                 )
                             ) : (
-                                <ArrowUpDown className="h-4 w-4 text-gray-400" />
+                                <ArrowUpDown className="h-4 w-4 text-gray-400"/>
                             )}
                         </span>
                     )}
                 </div>
             </div>
-            <ColumnResizer header={header} />
+            <ColumnResizer header={header}/>
         </TableHead>
     );
 };
