@@ -3,7 +3,6 @@ import {
     ColumnSizingState,
     SortingState,
     VisibilityState,
-    flexRender,
     getCoreRowModel,
     getSortedRowModel,
     useReactTable,

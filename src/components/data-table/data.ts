@@ -33,9 +33,9 @@ import {
 } from "@/components/data-table/columns";
 
 // Constants for data generation
-const USERS = 100;
-const PROJECTS = 20;
-const TASKS_PER_PROJECT = 50;
+const USERS = 5;
+const PROJECTS = 5;
+const TASKS_PER_PROJECT = 10;
 const COMMENTS_PER_TASK = 5;
 const ATTACHMENTS_PER_TASK = 3;
 const EPICS_PER_PROJECT = 5;
