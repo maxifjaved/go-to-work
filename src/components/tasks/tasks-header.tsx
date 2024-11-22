@@ -19,7 +19,11 @@ import {
 import { useTasks } from "./tasks-context"
 import { NewTaskDialog } from "./new-task-dialog"
 
-export function TasksHeader() {
+interface TasksHeaderProps {
+    hideProjectFilter?: boolean
+}
+
+export function TasksHeader({ hideProjectFilter }: TasksHeaderProps) {
     const {
         view,
         setView,
@@ -31,78 +35,73 @@ export function TasksHeader() {
         setSortDirection,
     } = useTasks()
 
+    const groupByOptions = [
+        { value: 'status', label: 'Status' },
+        { value: 'priority', label: 'Priority' },
+        { value: 'assignee', label: 'Assignee' },
+        ...(hideProjectFilter ? [] : [{ value: 'project', label: 'Project' }]),
+    ]
+
     return (
-        <div className="flex items-center justify-between">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
-                <p className="text-muted-foreground">
-                    Manage and organize all tasks across projects
-                </p>
-            </div>
-            <div className="flex items-center gap-2">
-                <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setView(view === "board" ? "list" : "board")}
-                >
-                    {view === "board" ? (
-                        <List className="h-4 w-4" />
-                    ) : (
-                        <Kanban className="h-4 w-4" />
-                    )}
-                </Button>
+        <div className="flex items-center gap-2">
+            <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setView(view === "board" ? "list" : "board")}
+            >
+                {view === "board" ? (
+                    <List className="h-4 w-4" />
+                ) : (
+                    <Kanban className="h-4 w-4" />
+                )}
+            </Button>
 
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon">
-                            <GroupIcon className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Group By</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => setGroupBy("status")}>
-                            Status {groupBy === "status" && "✓"}
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon">
+                        <GroupIcon className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Group By</DropdownMenuLabel>
+                    {groupByOptions.map(option => (
+                        <DropdownMenuItem
+                            key={option.value}
+                            onClick={() => setGroupBy(option.value as any)}
+                        >
+                            {option.label} {groupBy === option.value && "✓"}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setGroupBy("priority")}>
-                            Priority {groupBy === "priority" && "✓"}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setGroupBy("assignee")}>
-                            Assignee {groupBy === "assignee" && "✓"}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setGroupBy("project")}>
-                            Project {groupBy === "project" && "✓"}
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                    ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
 
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon">
-                            <SlidersHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Sort By</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => setSortBy("priority")}>
-                            Priority {sortBy === "priority" && (sortDirection === "asc" ? "↑" : "↓")}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setSortBy("dueDate")}>
-                            Due Date {sortBy === "dueDate" && (sortDirection === "asc" ? "↑" : "↓")}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setSortBy("status")}>
-                            Status {sortBy === "status" && (sortDirection === "asc" ? "↑" : "↓")}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => setSortDirection(
-                            sortDirection === "asc" ? "desc" : "asc"
-                        )}>
-                            {sortDirection === "asc" ? "Sort Descending" : "Sort Ascending"}
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon">
+                        <SlidersHorizontal className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => setSortBy("priority")}>
+                        Priority {sortBy === "priority" && (sortDirection === "asc" ? "↑" : "↓")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortBy("dueDate")}>
+                        Due Date {sortBy === "dueDate" && (sortDirection === "asc" ? "↑" : "↓")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortBy("status")}>
+                        Status {sortBy === "status" && (sortDirection === "asc" ? "↑" : "↓")}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setSortDirection(
+                        sortDirection === "asc" ? "desc" : "asc"
+                    )}>
+                        {sortDirection === "asc" ? "Sort Descending" : "Sort Ascending"}
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
 
-                <NewTaskDialog />
-            </div>
+            <NewTaskDialog />
         </div>
     )
 }

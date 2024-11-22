@@ -1,7 +1,7 @@
 "use client"
 
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import {Input} from "@/components/ui/input"
+import {Button} from "@/components/ui/button"
 import {
     Select,
     SelectContent,
@@ -9,13 +9,17 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { X } from "lucide-react"
-import { useTasks } from "./tasks-context"
-import {mockData} from "@/components/data-table/data";
+import {Badge} from "@/components/ui/badge"
+import {X} from "lucide-react"
+import {useTasks} from "./tasks-context"
+import {mockData} from "@/components/data-table/data"
 
-export function TasksFilters() {
-    const { filters, setFilters, searchQuery, setSearchQuery } = useTasks()
+interface TasksFiltersProps {
+    hideProjectFilter?: boolean
+}
+
+export function TasksFilters({hideProjectFilter}: TasksFiltersProps) {
+    const {filters, setFilters, searchQuery, setSearchQuery} = useTasks()
 
     const clearFilter = (type: string, value: string) => {
         setFilters({
@@ -26,10 +30,11 @@ export function TasksFilters() {
 
     const clearAllFilters = () => {
         setFilters({
+            ...filters,
             status: [],
             priority: [],
             assignee: [],
-            project: [],
+            ...(hideProjectFilter ? {} : {project: []})
         })
         setSearchQuery("")
     }
@@ -53,7 +58,7 @@ export function TasksFilters() {
                     }
                 >
                     <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Status" />
+                        <SelectValue placeholder="Status"/>
                     </SelectTrigger>
                     <SelectContent>
                         {["Backlog", "Todo", "In Progress", "In Review", "Done"].map((status) => (
@@ -72,7 +77,7 @@ export function TasksFilters() {
                     }
                 >
                     <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Priority" />
+                        <SelectValue placeholder="Priority"/>
                     </SelectTrigger>
                     <SelectContent>
                         {["Low", "Medium", "High", "Urgent"].map((priority) => (
@@ -91,7 +96,7 @@ export function TasksFilters() {
                     }
                 >
                     <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Assignee" />
+                        <SelectValue placeholder="Assignee"/>
                     </SelectTrigger>
                     <SelectContent>
                         {mockData.users.map((user) => (
@@ -101,6 +106,29 @@ export function TasksFilters() {
                         ))}
                     </SelectContent>
                 </Select>
+
+                {!hideProjectFilter && (
+                    <Select
+                        onValueChange={(value) =>
+                            setFilters({
+                                ...filters,
+                                project: [...filters.project, value]
+                            })
+                        }
+                    >
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Project"/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {mockData.projects.map((project) => (
+                                <SelectItem key={project.id} value={project.id.toString()}>
+                                    {project.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
+
             </div>
 
             {(Object.values(filters).some(arr => arr.length > 0) || searchQuery) && (
@@ -115,7 +143,7 @@ export function TasksFilters() {
                                     className="h-4 w-4 ml-2 hover:bg-transparent"
                                     onClick={() => clearFilter(type, value)}
                                 >
-                                    <X className="h-3 w-3" />
+                                    <X className="h-3 w-3"/>
                                 </Button>
                             </Badge>
                         ))
@@ -129,7 +157,7 @@ export function TasksFilters() {
                                 className="h-4 w-4 ml-2 hover:bg-transparent"
                                 onClick={() => setSearchQuery("")}
                             >
-                                <X className="h-3 w-3" />
+                                <X className="h-3 w-3"/>
                             </Button>
                         </Badge>
                     )}

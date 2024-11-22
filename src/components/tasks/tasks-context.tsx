@@ -26,13 +26,20 @@ interface TasksContextType {
         assignee: string[]
         project: string[]
     }
-    // @ts-expect-error - filters is an object
-    setFilters: (filters) => void
+    setFilters: (filters: TasksContextType['filters']) => void
 }
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined)
 
-export function TasksProvider({ children }: { children: React.ReactNode }) {
+interface TasksProviderProps {
+    children: React.ReactNode
+    defaultFilters?: Partial<TasksContextType['filters']>
+}
+
+export function TasksProvider({
+                                  children,
+                                  defaultFilters = {}
+                              }: TasksProviderProps) {
     const [view, setView] = useState<ViewType>("board")
     const [sortBy, setSortBy] = useState<SortType>("priority")
     const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
@@ -44,6 +51,7 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
         priority: [],
         assignee: [],
         project: [],
+        ...defaultFilters
     })
 
     return (
