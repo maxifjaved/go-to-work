@@ -177,7 +177,7 @@ Project Link: [https://github.com/yourusername/project-name](https://github.com/
 
 ---
 
-<p align="center">Made with ❤️ by Your Name</p>
+<p align="center">Made with ❤️ by Muhammad Asif Javed</p>
 
 Keywords: project management, nextjs dashboard, react admin panel, typescript dashboard, tailwind dashboard, open source project management, kanban board react, team collaboration tool
 
