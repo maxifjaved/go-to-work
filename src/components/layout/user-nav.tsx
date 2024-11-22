@@ -1,5 +1,3 @@
-"use client"
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -9,13 +7,16 @@ import {
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
+    DropdownMenuShortcut,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {mockData} from "@/components/data-table/data";
+import { useRouter } from "next/navigation"
+import { User, Settings, LifeBuoy, LogOut, PlusCircle, UserCircle, Bell } from "lucide-react"
+import { mockData } from "@/components/data-table/data"
 
 export function UserNav() {
-    // Get first user from mock data for demo
-    const user = mockData.users[0]
+    const router = useRouter()
+    const user = mockData.users[0] // Get first user from mock data for demo
 
     return (
         <DropdownMenu>
@@ -38,12 +39,40 @@ export function UserNav() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <DropdownMenuItem>Profile</DropdownMenuItem>
-                    <DropdownMenuItem>Settings</DropdownMenuItem>
-                    <DropdownMenuItem>New Project</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/profile')}>
+                        <UserCircle className="mr-2 h-4 w-4" />
+                        Profile
+                        <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/profile/teams')}>
+                        <User className="mr-2 h-4 w-4" />
+                        Teams
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/settings')}>
+                        <Settings className="mr-2 h-4 w-4" />
+                        Settings
+                        <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/projects/new')}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        New Project
+                    </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Log out</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/settings/notifications')}>
+                    <Bell className="mr-2 h-4 w-4" />
+                    Notifications
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                    <LifeBuoy className="mr-2 h-4 w-4" />
+                    Support
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-red-600">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Log out
+                    <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     )

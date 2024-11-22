@@ -1,68 +1,60 @@
-'use client'
-
 import { Suspense } from "react"
-import { ProjectBreadcrumbs } from "@/components/projects/project-details/project-breadcrumbs"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useRouter, usePathname } from "next/navigation"
+import { Breadcrumbs } from "@/components/layout/breadcrumbs"
 import { mockData } from "@/components/data-table/data"
 
-interface ProjectLayoutProps {
+interface TeamMemberLayoutProps {
     children: React.ReactNode
     params: {
         id: string
     }
 }
 
-export default function ProjectLayout({ children, params }: ProjectLayoutProps) {
+export default function TeamMemberLayout({ children, params }: TeamMemberLayoutProps) {
     const router = useRouter()
     const pathname = usePathname()
-    const project = mockData.projects.find(p => p.id.toString() === params.id)
+    const member = mockData.users.find(u => u.id.toString() === params.id)
 
-    // Get the current active tab from the pathname
+    if (!member) {
+        return <div>Team member not found</div>
+    }
+
     const getActiveTab = () => {
-        if (pathname.endsWith('analytics')) return 'analytics'
-        if (pathname.endsWith('team')) return 'team'
+        if (pathname.endsWith('tasks')) return 'tasks'
+        if (pathname.endsWith('projects')) return 'projects'
+        if (pathname.endsWith('activity')) return 'activity'
         if (pathname.endsWith('settings')) return 'settings'
         return 'overview'
     }
 
-    // Handle tab changes
     const handleTabChange = (value: string) => {
         switch (value) {
             case 'overview':
-                router.push(`/projects/${params.id}`)
+                router.push(`/team/${params.id}`)
                 break
-            case 'analytics':
-                router.push(`/projects/${params.id}/analytics`)
+            case 'tasks':
+                router.push(`/team/${params.id}/tasks`)
                 break
-            case 'team':
-                router.push(`/projects/${params.id}/team`)
+            case 'projects':
+                router.push(`/team/${params.id}/projects`)
+                break
+            case 'activity':
+                router.push(`/team/${params.id}/activity`)
                 break
             case 'settings':
-                router.push(`/projects/${params.id}/settings`)
+                router.push(`/team/${params.id}/settings`)
                 break
         }
-    }
-
-    if (!project) {
-        return (
-            <div className="space-y-6">
-                <Skeleton className="h-6 w-[200px]" />
-                <Separator />
-                <div className="space-y-8">
-                    <Skeleton className="h-[500px]" />
-                </div>
-            </div>
-        )
     }
 
     return (
         <div className="space-y-6">
             <div className="space-y-0.5">
                 <Suspense fallback={<Skeleton className="h-6 w-[200px]" />}>
-                    <ProjectBreadcrumbs projectId={params.id} />
+                    <Breadcrumbs />
                 </Suspense>
             </div>
             <Separator />
@@ -70,13 +62,16 @@ export default function ProjectLayout({ children, params }: ProjectLayoutProps) 
                 <div className="flex items-center justify-between">
                     <TabsList>
                         <TabsTrigger value="overview">Overview</TabsTrigger>
-                        <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                        <TabsTrigger value="team">Team</TabsTrigger>
+                        <TabsTrigger value="tasks">Tasks</TabsTrigger>
+                        <TabsTrigger value="projects">Projects</TabsTrigger>
+                        <TabsTrigger value="activity">Activity</TabsTrigger>
                         <TabsTrigger value="settings">Settings</TabsTrigger>
                     </TabsList>
                 </div>
             </Tabs>
-            {children}
+            <div className="space-y-6">
+                {children}
+            </div>
         </div>
     )
 }

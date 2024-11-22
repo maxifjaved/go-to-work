@@ -1,5 +1,4 @@
 import { Suspense } from "react"
-import { ReportsHeader } from "@/components/reports/reports-header"
 import { ProjectMetrics } from "@/components/reports/project-metrics"
 import { TaskCompletionChart } from "@/components/reports/task-completion-chart"
 import { TeamPerformanceReport } from "@/components/reports/team-performance"
@@ -9,7 +8,13 @@ import { LoadingReports } from "@/components/reports/loading"
 export default function ReportsPage() {
     return (
         <div className="flex flex-col space-y-8">
-            <ReportsHeader />
+            <div className="flex flex-col space-y-4">
+                <h2 className="text-2xl font-bold tracking-tight">Reports Overview</h2>
+                <p className="text-muted-foreground">
+                    View key metrics and performance indicators across all projects and teams.
+                </p>
+            </div>
+
             <Suspense fallback={<LoadingReports />}>
                 <div className="grid gap-6">
                     <ProjectMetrics />

@@ -1,5 +1,3 @@
-"use client"
-
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -20,7 +18,7 @@ import {
     X,
 } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import {
     Collapsible,
@@ -37,6 +35,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, isMobile, onClose }: SidebarProps) {
     const pathname = usePathname()
+    const router = useRouter()
     const [openSections, setOpenSections] = useState<string[]>(["projects"])
 
     const toggleSection = (section: string) => {
@@ -52,6 +51,7 @@ export function Sidebar({ isOpen, isMobile, onClose }: SidebarProps) {
             title: "Dashboard",
             href: "/",
             icon: LayoutDashboard,
+            badge: null,
         },
         {
             title: "Projects",
@@ -69,18 +69,30 @@ export function Sidebar({ isOpen, isMobile, onClose }: SidebarProps) {
             title: "Team",
             href: "/team",
             icon: Users,
+            badge: null,
         },
         {
             title: "Reports",
             href: "/reports",
             icon: BarChart3,
+            badge: null,
         },
         {
             title: "Settings",
             href: "/settings",
             icon: Settings,
+            badge: null,
         },
     ]
+
+    const handleNewProject = () => {
+        router.push("/projects/new")
+    }
+
+    const handleLogout = () => {
+        // Implement logout logic
+        router.push("/login")
+    }
 
     const sidebarContent = (
         <>
@@ -106,12 +118,12 @@ export function Sidebar({ isOpen, isMobile, onClose }: SidebarProps) {
                     <div className="px-3 py-2">
                         <div className="flex items-center gap-x-3">
                             {isOpen ? (
-                                <Button className="w-full justify-start">
+                                <Button className="w-full justify-start" onClick={handleNewProject}>
                                     <PlusCircle className="mr-2 h-4 w-4" />
                                     New Project
                                 </Button>
                             ) : (
-                                <Button size="icon" className="w-full">
+                                <Button size="icon" className="w-full" onClick={handleNewProject}>
                                     <PlusCircle className="h-4 w-4" />
                                 </Button>
                             )}
@@ -134,7 +146,7 @@ export function Sidebar({ isOpen, isMobile, onClose }: SidebarProps) {
                                     <item.icon className="h-4 w-4" />
                                     {isOpen && (
                                         <span className="flex-1">
-                      {item.title}
+                                            {item.title}
                                             {item.badge && (
                                                 <Badge
                                                     variant="secondary"
@@ -143,7 +155,7 @@ export function Sidebar({ isOpen, isMobile, onClose }: SidebarProps) {
                                                     {item.badge}
                                                 </Badge>
                                             )}
-                    </span>
+                                        </span>
                                     )}
                                 </Link>
                             ))}
@@ -261,6 +273,7 @@ export function Sidebar({ isOpen, isMobile, onClose }: SidebarProps) {
                             <Button
                                 variant="ghost"
                                 className="w-full justify-start"
+                                onClick={handleLogout}
                             >
                                 <LogOut className="mr-2 h-4 w-4" />
                                 Log Out
@@ -270,6 +283,7 @@ export function Sidebar({ isOpen, isMobile, onClose }: SidebarProps) {
                                 variant="ghost"
                                 size="icon"
                                 className="w-full"
+                                onClick={handleLogout}
                             >
                                 <LogOut className="h-4 w-4" />
                             </Button>

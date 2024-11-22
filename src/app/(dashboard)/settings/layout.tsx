@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import { Separator } from "@/components/ui/separator"
 import { SidebarNav } from "@/components/settings/sidebar-nav"
 import { LoadingSettings } from "@/components/settings/loading"
+import { Breadcrumbs } from "@/components/layout/breadcrumbs"
 
 const sidebarNavItems = [
     {
@@ -37,11 +38,8 @@ interface SettingsLayoutProps {
 export default function SettingsLayout({ children }: SettingsLayoutProps) {
     return (
         <div className="space-y-6">
-            <div>
-                <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
-                <p className="text-muted-foreground">
-                    Manage your account settings and preferences.
-                </p>
+            <div className="space-y-0.5">
+                <Breadcrumbs />
             </div>
             <Separator />
             <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
