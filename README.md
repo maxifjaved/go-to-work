@@ -3,18 +3,18 @@
 A modern open-source project management solution built with Next.js 15, TypeScript, and Tailwind CSS. Perfect for teams looking for a Jira/Asana alternative with a clean, modern interface.
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.0-38bdf8)](https://tailwindcss.com/)
 [![React Query](https://img.shields.io/badge/React%20Query-Latest-ff4154)](https://tanstack.com/query/latest)
 
-[Live Demo](your-demo-link) | [Documentation](your-docs-link) | [Report Bug](issues-link) | [Request Feature](issues-link)
+[Live Demo](https://go-to-work.vercel.app) | [Documentation](#) | [Report Bug](#) | [Request Feature](#)
 
 ![Project Screenshot](screenshot.png)
 
 ## Why Choose This Project? 🤔
 
-- 🎯 **Production Ready**: Built with Next.js 14 and modern best practices
+- 🎯 **Production Ready**: Built with Next.js 15 and modern best practices
 - ⚡ **High Performance**: Optimized for speed with server components
 - 🎨 **Beautiful UI**: Stunning interface built with Tailwind and shadcn/ui
 - 📱 **Fully Responsive**: Works perfectly on all devices
