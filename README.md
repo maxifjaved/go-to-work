@@ -61,7 +61,7 @@ A modern open-source project management solution built with Next.js 15, TypeScri
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/project-name.git
+git clone https://github.com/maxifjaved/go-to-work.git
 
 # Install dependencies
 npm install
