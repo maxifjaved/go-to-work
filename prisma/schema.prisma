@@ -1,0 +1,810 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Static Enums
+enum CustomFieldType {
+  Text
+  Number
+  Date
+  Select
+  MultiSelect
+  User
+  URL
+}
+
+enum CustomFieldEntityType {
+  Task
+  Project
+  Epic
+  Sprint
+}
+
+enum AutomationOperator {
+  equals
+  not_equals
+  contains
+  greater_than
+  less_than
+}
+
+enum UserStatus {
+  Active
+  Away
+  Offline
+  DoNotDisturb
+}
+
+enum NotificationFrequency {
+  Instant
+  Daily
+  Weekly
+}
+
+enum ThemeType {
+  Light
+  Dark
+  System
+}
+
+enum ViewType {
+  List
+  Board
+  Calendar
+}
+
+enum TimeFormat {
+  h12
+  h24
+}
+
+enum Environment {
+  Development
+  Staging
+  Production
+}
+
+enum IntegrationStatus {
+  Active
+  Inactive
+}
+
+enum TaskActivityAction {
+  created
+  updated
+  commented
+  status_changed
+  assigned
+}
+
+enum TaskRelationship {
+  relates_to
+  duplicates
+  blocks
+  is_blocked_by
+  implements
+  fixes
+}
+
+// Dynamic Reference Tables
+model PriorityType {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  color       String?
+  icon        String?
+  order       Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  tasks       Task[]
+  epics       Epic[]
+}
+
+model StatusType {
+  id              Int       @id @default(autoincrement())
+  name            String    @unique
+  description     String?
+  color           String?
+  icon            String?
+  category        String    // e.g., "Todo", "In Progress", "Done"
+  order           Int       @default(0)
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  tasks           Task[]
+  customStatuses  TaskCustomStatus[]
+}
+
+model TaskType {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  icon        String?
+  color       String?
+  order       Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  tasks       Task[]
+}
+
+model VisibilityType {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  icon        String?
+  order       Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  projects    Project[]
+}
+
+model SprintStatusType {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  color       String?
+  icon        String?
+  order       Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sprints     Sprint[]
+}
+
+model ProjectStatusType {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  color       String?
+  icon        String?
+  order       Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  projects    Project[]
+}
+
+model RiskLevelType {
+  id               Int       @id @default(autoincrement())
+  name             String    @unique
+  description      String?
+  color            String?
+  order            Int       @default(0)
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  risksImpact      Risk[]    @relation("RiskImpact")
+  risksProbability Risk[]    @relation("RiskProbability")
+}
+
+model RiskStatusType {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  color       String?
+  order       Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  risks       Risk[]
+}
+
+model EpicStatusType {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  color       String?
+  icon        String?
+  order       Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  epics       Epic[]
+}
+
+model MilestoneStatusType {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  description String?
+  color       String?
+  icon        String?
+  order       Int         @default(0)
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  milestones  Milestone[]
+}
+
+// Core Models
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  name          String
+  title         String?
+  designation   String?
+  age           Int?
+  address       String?
+  language      String?
+  timeZone      String
+  role          String
+  department    String?
+  avatar        String?
+  status        UserStatus
+  lastActive    DateTime?
+  skills        String[]
+  projectsOwned Project[]
+  workSchedule  WorkSchedule?
+  preferences   UserPreferences?
+  lastLoginAt   DateTime?
+  lastLogoutAt  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  isActive      Boolean   @default(true)
+  isAdmin       Boolean   @default(false)
+  isSuperAdmin  Boolean   @default(false)
+  
+  // Relations
+  teams             TeamMember[]
+  assignedTasks     Task[]          @relation("TaskAssignee")
+  reportedTasks     Task[]          @relation("TaskReporter")
+  comments          Comment[]
+  timeEntries       TimeEntry[]
+  ownedEpics        Epic[]
+  taskActivities    TaskActivity[]
+  ownedMilestones   Milestone[]
+  ownedRisks        Risk[]
+  auditLogs         AuditLog[]
+
+  @@index([email])
+  @@index([status])
+  @@index([isActive])
+}
+
+model WorkSchedule {
+  id          Int          @id @default(autoincrement())
+  userId      Int          @unique
+  user        User         @relation(fields: [userId], references: [id])
+  start       String
+  end         String
+  timeZone    String
+  daysOfWeek  Boolean[]
+  holidays    String[]
+  vacations   Vacation[]
+}
+
+model Vacation {
+  id              Int          @id @default(autoincrement())
+  workScheduleId  Int
+  workSchedule    WorkSchedule @relation(fields: [workScheduleId], references: [id])
+  start           DateTime
+  end             DateTime
+  type            String
+}
+
+model UserPreferences {
+  id                    Int                   @id @default(autoincrement())
+  userId                Int                   @unique
+  user                  User                  @relation(fields: [userId], references: [id])
+  emailNotification     Boolean               @default(true)
+  pushNotification      Boolean               @default(true)
+  desktopNotification   Boolean               @default(true)
+  notificationFrequency NotificationFrequency @default(Daily)
+  notificationTypes     String[]
+  theme                 ThemeType             @default(System)
+  defaultView           ViewType              @default(Board)
+  timeFormat           TimeFormat            @default(h24)
+  defaultDashboard     String?
+}
+
+model Task {
+  id                    Int          @id @default(autoincrement())
+  title                 String
+  description          String        @db.Text
+  statusId             Int
+  status               StatusType    @relation(fields: [statusId], references: [id])
+  statusOrder          Int           @default(0)
+  priorityId           Int
+  priority             PriorityType  @relation(fields: [priorityId], references: [id])
+  priorityOrder        Int           @default(0)
+  typeId               Int
+  type                 TaskType      @relation(fields: [typeId], references: [id])
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  dueDate              DateTime?
+  dueTime              String?
+  estimatedHours       Float         @db.Decimal(10,2)
+  actualHours          Float         @db.Decimal(10,2)
+  cycleTime            Float?
+  leadTime            Float?
+  assigneeId           Int?
+  assignee             User?         @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  reporterId           Int?
+  reporter             User?         @relation("TaskReporter", fields: [reporterId], references: [id])
+  projectId            Int?
+  project              Project?      @relation(fields: [projectId], references: [id])
+  sprintId             Int?
+  sprint               Sprint?       @relation(fields: [sprintId], references: [id])
+  epicId               Int?
+  epic                 Epic?         @relation(fields: [epicId], references: [id])
+  parentTaskId         Int?
+  parentTask           Task?         @relation("TaskSubtasks", fields: [parentTaskId], references: [id])
+  subtasks             Task[]        @relation("TaskSubtasks")
+  blockingTasks        Task[]        @relation("TaskBlocking")
+  blockedByTasks       Task[]        @relation("TaskBlocking")
+  watchers             Int[]
+  progress             Float         @default(0)
+  storyPoints          Float?
+  originalEstimate     Float?
+  remainingEstimate    Float?
+  environment          Environment?
+  version              String?
+  startDate            DateTime?
+  completedAt          DateTime?
+  estimatedCompletionDate DateTime?
+  weight               Float         @default(1.0)
+  order                Int           @default(0)
+  key                  String
+  timeZone             String?
+  lastViewedAt         DateTime?
+  subscribedUsers      Int[]
+  isFlagged           Boolean        @default(false)
+  isStarred           Boolean        @default(false)
+  reminderSet          Boolean        @default(false)
+  reminderTime         DateTime?
+  isRecurring          Boolean        @default(false)
+  isDeleted            Boolean        @default(false)
+  deletedAt            DateTime?
+  deletedBy            Int?
+  isBlocked            Boolean        @default(false)
+
+  // Relations
+  customFields         CustomFieldValue[]
+  comments             Comment[]
+  attachments          Attachment[]
+  timeEntries          TimeEntry[]
+  linkedTasks          TaskLink[]
+  activities           TaskActivity[]
+  customStatus         TaskCustomStatus?   @relation(fields: [customStatusId], references: [id])
+  customStatusId       Int?
+  recurringPattern     RecurringPattern?
+  labels               Label[]
+  dependencies         Dependency[]       @relation("SourceTask")
+  dependentOn          Dependency[]       @relation("TargetTask")
+
+  @@index([assigneeId, statusId])
+  @@index([projectId, statusId])
+  @@index([sprintId, statusId])
+  @@index([dueDate])
+  @@index([createdAt])
+  @@index([isDeleted])
+  @@check(estimatedHours >= 0)
+  @@check(actualHours >= 0)
+}
+
+model TaskCustomStatus {
+  id          Int          @id @default(autoincrement())
+  name        String
+  color       String
+  statusId    Int
+  status      StatusType   @relation(fields: [statusId], references: [id])
+  description String?
+  icon        String?
+  order       Int          @default(0)
+  tasks       Task[]
+  projectId   Int
+  project     Project      @relation(fields: [projectId], references: [id])
+}
+
+model TaskLink {
+  id            Int              @id @default(autoincrement())
+  taskId        Int
+  task          Task             @relation(fields: [taskId], references: [id])
+  linkedTaskId  Int
+  relationship  TaskRelationship
+
+  @@index([taskId])
+  @@index([linkedTaskId])
+}
+
+model TaskActivity {
+  id        Int                @id @default(autoincrement())
+  taskId    Int
+  task      Task               @relation(fields: [taskId], references: [id])
+  userId    Int
+  user      User               @relation(fields: [userId], references: [id])
+  action    TaskActivityAction
+  details   Json?
+  createdAt DateTime           @default(now())
+
+  @@index([taskId])
+  @@index([userId])
+}
+
+model Comment {
+  id              Int          @id @default(autoincrement())
+  taskId          Int
+  task            Task         @relation(fields: [taskId], references: [id])
+  userId          Int
+  user            User         @relation(fields: [userId], references: [id])
+  content         String       @db.Text
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  mentions        Int[]
+  isEdited        Boolean      @default(false)
+  isDeleted       Boolean      @default(false)
+  parentCommentId Int?
+  parentComment   Comment?     @relation("CommentReplies", fields: [parentCommentId], references: [id])
+  childComments   Comment[]    @relation("CommentReplies")
+  attachments     Attachment[]
+  reactions       Reaction[]
+
+  @@index([taskId])
+  @@index([userId])
+  @@index([parentCommentId])
+}
+
+model Attachment {
+  id            Int       @id @default(autoincrement())
+  name          String
+  url           String
+  type          String
+  size          Int
+  uploadedBy    Int
+  uploadedAt    DateTime  @default(now())
+  isDeleted     Boolean   @default(false)
+  deletedAt     DateTime?
+  deletedBy     Int?
+  taskId        Int?
+  task          Task?     @relation(fields: [taskId], references: [id])
+  commentId     Int?
+  comment       Comment?  @relation(fields: [commentId], references: [id])
+
+  @@index([taskId])
+  @@index([commentId])
+}
+
+model Reaction {
+  id        Int      @id @default(autoincrement())
+  emoji     String
+  userId    Int
+  commentId Int
+  comment   Comment  @relation(fields: [commentId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([commentId])
+  @@index([userId])
+}
+
+model RecurringPattern {
+  id                    Int      @id @default(autoincrement())
+  taskId                Int      @unique
+  task                  Task     @relation(fields: [taskId], references: [id])
+  frequency             String
+  interval              Int
+  endDate              DateTime?
+  endAfterOccurrences  Int?
+  daysOfWeek           Int[]
+  monthDay             Int?
+  weekNumber           Int?
+}
+
+model TimeEntry {
+  id          Int      @id @default(autoincrement())
+  taskId      Int
+  task        Task     @relation(fields: [taskId], references: [id])
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  startTime   DateTime
+  endTime     DateTime?
+  duration    Int
+  description String?
+  billable    Boolean  @default(false)
+  category    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isRunning   Boolean  @default(false)
+
+  @@index([taskId])
+  @@index([userId])
+}
+
+model Sprint {
+  id                  Int              @id @default(autoincrement())
+  name                String
+  goal                String?
+  startDate           DateTime
+  endDate             DateTime
+  statusId            Int
+  status              SprintStatusType @relation(fields: [statusId], references: [id])
+  projectId           Int
+  project             Project          @relation(fields: [projectId], references: [id])
+  tasks               Task[]
+  createdAt           DateTime         @default(now())
+  createdBy           Int
+  updatedAt           DateTime         @updatedAt
+  order               Int              @default(0)
+  isDeleted           Boolean          @default(false)
+  metrics             Json
+
+  @@index([projectId])
+  @@index([statusId])
+  @@check(endDate > startDate)
+}
+
+model Epic {
+  id                Int              @id @default(autoincrement())
+  title             String
+  description       String           @db.Text
+  statusId          Int
+  status            EpicStatusType   @relation(fields: [statusId], references: [id])
+  startDate         DateTime
+  targetDate        DateTime
+  projectId         Int
+  project           Project          @relation(fields: [projectId], references: [id])
+  tasks             Task[]
+  progress          Float            @default(0)
+  ownerId           Int
+  owner             User             @relation(fields: [ownerId], references: [id])
+  priorityId        Int
+  priority          PriorityType     @relation(fields: [priorityId], references: [id])
+  priorityOrder     Int              @default(0)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  order             Int              @default(0)
+  key               String
+  customFields      CustomFieldValue[]
+  isDeleted         Boolean          @default(false)
+  dependencies      Int[]
+
+  @@index([projectId])
+  @@index([statusId])
+  @@index([ownerId])
+}
+
+model Project {
+  id                  Int               @id @default(autoincrement())
+  name                String
+  description         String            @db.Text
+  key                 String            @unique
+  visibilityId        Int
+  visibility          VisibilityType    @relation(fields: [visibilityId], references: [id])
+  category            String?
+  department          String?
+  statusId            Int
+  status              ProjectStatusType @relation(fields: [statusId], references: [id])
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  startDate           DateTime
+  endDate             DateTime?
+  ownerId             Int
+  owner               User              @relation(fields: [ownerId], references: [id])
+  team                TeamMember[]
+  epics               Epic[]
+  sprints             Sprint[]
+  tasks               Task[]
+  tags                String[]
+  customFields        CustomFieldValue[]
+  settings            Json
+  budget              Json?
+  milestones          Milestone[]
+  risks               Risk[]
+  customStatuses      TaskCustomStatus[]
+  integrations        Integration[]
+  automations         Automation[]
+  isTemplate          Boolean           @default(false)
+  isDeleted           Boolean           @default(false)
+  deletedAt           DateTime?
+  deletedBy           Int?
+  teams               Team[]
+  labels              Label[]
+  metrics             ProjectMetrics?
+
+  @@index([ownerId])
+  @@index([statusId])
+  @@index([department])
+  @@index([isDeleted])
+}
+
+model ProjectMetrics {
+  id                Int      @id @default(autoincrement())
+  projectId         Int      @unique
+  project           Project  @relation(fields: [projectId], references: [id])
+  
+  velocityData      Json     
+  cycleTimeAvg      Float
+  leadTimeAvg       Float
+  throughput        Float
+  qualityMetrics    Json     
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Team {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  members     TeamMember[]
+  projects    Project[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TeamMember {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id])
+  teamId        Int
+  team          Team     @relation(fields: [teamId], references: [id])
+  projectId     Int?
+  project       Project? @relation(fields: [projectId], references: [id])
+  role          String
+  permissions   String[]
+  joinedAt      DateTime @default(now())
+  lastActiveAt  DateTime?
+
+  @@unique([userId, teamId, projectId])
+  @@index([userId])
+  @@index([teamId])
+  @@index([projectId])
+}
+
+model CustomField {
+  id          Int                   @id @default(autoincrement())
+  name        String
+  type        CustomFieldType
+  options     String[]
+  required    Boolean               @default(false)
+  entityType  CustomFieldEntityType
+  defaultValue Json?
+  order       Int                   @default(0)
+  isActive    Boolean               @default(true)
+  values      CustomFieldValue[]
+}
+
+model CustomFieldValue {
+  id            Int          @id @default(autoincrement())
+  fieldId       Int
+  field         CustomField  @relation(fields: [fieldId], references: [id])
+  value         Json
+  taskId        Int?
+  task          Task?        @relation(fields: [taskId], references: [id])
+  projectId     Int?
+  project       Project?     @relation(fields: [projectId], references: [id])
+  epicId        Int?
+  epic          Epic?        @relation(fields: [epicId], references: [id])
+
+  @@index([fieldId])
+  @@index([taskId])
+  @@index([projectId])
+  @@index([epicId])
+}
+
+model Label {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  color       String
+  description String?
+  projectId   Int?
+  project     Project?  @relation(fields: [projectId], references: [id])
+  tasks       Task[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([projectId])
+}
+
+model Milestone {
+  id          Int                  @id @default(autoincrement())
+  name        String
+  description String?              @db.Text
+  dueDate     DateTime
+  statusId    Int
+  status      MilestoneStatusType  @relation(fields: [statusId], references: [id])
+  progress    Float                @default(0)
+  tasks       Int[]
+  dependencies Int[]
+  ownerId     Int
+  owner       User                 @relation(fields: [ownerId], references: [id])
+  budget      Float?
+  actualCost  Float?
+  projectId   Int
+  project     Project              @relation(fields: [projectId], references: [id])
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  isDeleted   Boolean              @default(false)
+
+  @@index([projectId])
+  @@index([statusId])
+  @@index([ownerId])
+}
+
+model Risk {
+  id              Int             @id @default(autoincrement())
+  description     String          @db.Text
+  probabilityId   Int
+  probability     RiskLevelType   @relation("RiskProbability", fields: [probabilityId], references: [id])
+  impactId        Int
+  impact          RiskLevelType   @relation("RiskImpact", fields: [impactId], references: [id])
+  mitigationPlan  String          @db.Text
+  statusId        Int
+  status          RiskStatusType  @relation(fields: [statusId], references: [id])
+  ownerId         Int
+  owner           User            @relation(fields: [ownerId], references: [id])
+  projectId       Int
+  project         Project         @relation(fields: [projectId], references: [id])
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([projectId])
+  @@index([ownerId])
+  @@index([statusId])
+}
+
+model Integration {
+  id          Int               @id @default(autoincrement())
+  type        String
+  config      Json              // Storing IntegrationConfig as JSON
+  status      IntegrationStatus
+  lastSyncAt  DateTime?
+  errors      String[]
+  projectId   Int
+  project     Project          @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+}
+
+model Automation {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String    @db.Text
+  trigger     Json      // Storing trigger configuration as JSON
+  actions     Json      // Storing actions as JSON
+  isActive    Boolean   @default(true)
+  createdBy   Int
+  updatedAt   DateTime  @updatedAt
+  lastRunAt   DateTime?
+  runCount    Int       @default(0)
+  projectId   Int
+  project     Project   @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+}
+
+model Dependency {
+  id              Int      @id @default(autoincrement())
+  sourceTaskId    Int
+  sourceTask      Task     @relation("SourceTask", fields: [sourceTaskId], references: [id])
+  targetTaskId    Int
+  targetTask      Task     @relation("TargetTask", fields: [targetTaskId], references: [id])
+  type            String   
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([sourceTaskId, targetTaskId])
+  @@index([sourceTaskId])
+  @@index([targetTaskId])
+}
+
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  entityType  String   
+  entityId    Int
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  action      String
+  changes     Json
+  createdAt   DateTime @default(now())
+  
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+}
