@@ -94,139 +94,229 @@ enum TaskRelationship {
 // Dynamic Reference Tables
 model PriorityType {
   id          Int       @id @default(autoincrement())
-  name        String    @unique
+  name        String
   description String?
   color       String?
   icon        String?
   order       Int       @default(0)
   isActive    Boolean   @default(true)
+  projectId   Int?      // Optional to allow global types
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  deletedBy   Int?
+  isDeleted   Boolean   @default(false)
+  version     Int       @default(1)
   tasks       Task[]
   epics       Epic[]
+
+  @@unique([name, projectId])
+  @@index([projectId])
+  @@index([isDeleted])
 }
 
 model StatusType {
   id              Int       @id @default(autoincrement())
-  name            String    @unique
+  name            String
   description     String?
   color           String?
   icon            String?
   category        String    // e.g., "Todo", "In Progress", "Done"
   order           Int       @default(0)
   isActive        Boolean   @default(true)
+  projectId       Int?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  deletedBy       Int?
+  isDeleted       Boolean   @default(false)
+  version         Int       @default(1)
   tasks           Task[]
   customStatuses  TaskCustomStatus[]
+
+  @@unique([name, projectId])
+  @@index([projectId])
+  @@index([isDeleted])
 }
 
 model TaskType {
   id          Int       @id @default(autoincrement())
-  name        String    @unique
+  name        String
   description String?
   icon        String?
   color       String?
   order       Int       @default(0)
   isActive    Boolean   @default(true)
+  projectId   Int?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  deletedBy   Int?
+  isDeleted   Boolean   @default(false)
+  version     Int       @default(1)
   tasks       Task[]
+
+  @@unique([name, projectId])
+  @@index([projectId])
+  @@index([isDeleted])
 }
 
 model VisibilityType {
   id          Int       @id @default(autoincrement())
-  name        String    @unique
+  name        String
   description String?
   icon        String?
   order       Int       @default(0)
   isActive    Boolean   @default(true)
+  projectId   Int?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  deletedBy   Int?
+  isDeleted   Boolean   @default(false)
+  version     Int       @default(1)
   projects    Project[]
+
+  @@unique([name, projectId])
+  @@index([projectId])
+  @@index([isDeleted])
 }
 
 model SprintStatusType {
   id          Int       @id @default(autoincrement())
-  name        String    @unique
+  name        String
   description String?
   color       String?
   icon        String?
   order       Int       @default(0)
   isActive    Boolean   @default(true)
+  projectId   Int?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  deletedBy   Int?
+  isDeleted   Boolean   @default(false)
+  version     Int       @default(1)
   sprints     Sprint[]
+
+  @@unique([name, projectId])
+  @@index([projectId])
+  @@index([isDeleted])
 }
 
 model ProjectStatusType {
   id          Int       @id @default(autoincrement())
-  name        String    @unique
+  name        String
   description String?
   color       String?
   icon        String?
   order       Int       @default(0)
   isActive    Boolean   @default(true)
+  projectId   Int?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  deletedBy   Int?
+  isDeleted   Boolean   @default(false)
+  version     Int       @default(1)
   projects    Project[]
+
+  @@unique([name, projectId])
+  @@index([projectId])
+  @@index([isDeleted])
 }
 
 model RiskLevelType {
   id               Int       @id @default(autoincrement())
-  name             String    @unique
+  name             String
   description      String?
   color            String?
   order            Int       @default(0)
   isActive         Boolean   @default(true)
+  projectId        Int?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+  deletedBy        Int?
+  isDeleted        Boolean   @default(false)
+  version          Int       @default(1)
   risksImpact      Risk[]    @relation("RiskImpact")
   risksProbability Risk[]    @relation("RiskProbability")
+
+  @@unique([name, projectId])
+  @@index([projectId])
+  @@index([isDeleted])
 }
 
 model RiskStatusType {
   id          Int       @id @default(autoincrement())
-  name        String    @unique
+  name        String
   description String?
   color       String?
   order       Int       @default(0)
   isActive    Boolean   @default(true)
+  projectId   Int?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  deletedBy   Int?
+  isDeleted   Boolean   @default(false)
+  version     Int       @default(1)
   risks       Risk[]
+
+  @@unique([name, projectId])
+  @@index([projectId])
+  @@index([isDeleted])
 }
 
 model EpicStatusType {
   id          Int       @id @default(autoincrement())
-  name        String    @unique
+  name        String
   description String?
   color       String?
   icon        String?
   order       Int       @default(0)
   isActive    Boolean   @default(true)
+  projectId   Int?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  deletedBy   Int?
+  isDeleted   Boolean   @default(false)
+  version     Int       @default(1)
   epics       Epic[]
+
+  @@unique([name, projectId])
+  @@index([projectId])
+  @@index([isDeleted])
 }
 
 model MilestoneStatusType {
   id          Int         @id @default(autoincrement())
-  name        String      @unique
+  name        String
   description String?
   color       String?
   icon        String?
   order       Int         @default(0)
   isActive    Boolean     @default(true)
+  projectId   Int?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+  deletedBy   Int?
+  isDeleted   Boolean     @default(false)
+  version     Int         @default(1)
   milestones  Milestone[]
+
+  @@unique([name, projectId])
+  @@index([projectId])
+  @@index([isDeleted])
 }
 
 // Core Models
 model User {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
   name          String
   title         String?
   designation   String?
@@ -240,18 +330,25 @@ model User {
   status        UserStatus
   lastActive    DateTime?
   skills        String[]
-  projectsOwned Project[]
+  version       Int       @default(1)
+  lastApiCall   DateTime?
+  apiCallCount  Int       @default(0)
+  rateLimitTier String    @default("standard")
   workSchedule  WorkSchedule?
   preferences   UserPreferences?
   lastLoginAt   DateTime?
   lastLogoutAt  DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  deletedBy     Int?
+  isDeleted     Boolean   @default(false)
   isActive      Boolean   @default(true)
   isAdmin       Boolean   @default(false)
   isSuperAdmin  Boolean   @default(false)
   
   // Relations
+  projectsOwned     Project[]
   teams             TeamMember[]
   assignedTasks     Task[]          @relation("TaskAssignee")
   reportedTasks     Task[]          @relation("TaskReporter")
@@ -266,6 +363,7 @@ model User {
   @@index([email])
   @@index([status])
   @@index([isActive])
+  @@index([isDeleted])
 }
 
 model WorkSchedule {
@@ -277,6 +375,7 @@ model WorkSchedule {
   timeZone    String
   daysOfWeek  Boolean[]
   holidays    String[]
+  version     Int          @default(1)
   vacations   Vacation[]
 }
 
@@ -287,6 +386,9 @@ model Vacation {
   start           DateTime
   end             DateTime
   type            String
+  version         Int          @default(1)
+
+  @@check(end > start)
 }
 
 model UserPreferences {
@@ -299,9 +401,10 @@ model UserPreferences {
   notificationFrequency NotificationFrequency @default(Daily)
   notificationTypes     String[]
   theme                 ThemeType             @default(System)
-  defaultView           ViewType              @default(Board)
+  defaultView          ViewType              @default(Board)
   timeFormat           TimeFormat            @default(h24)
   defaultDashboard     String?
+  version              Int                    @default(1)
 }
 
 model Task {
@@ -316,14 +419,18 @@ model Task {
   priorityOrder        Int           @default(0)
   typeId               Int
   type                 TaskType      @relation(fields: [typeId], references: [id])
+  version              Int           @default(1)
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
+  deletedAt            DateTime?
+  deletedBy            Int?
+  isDeleted            Boolean       @default(false)
   dueDate              DateTime?
   dueTime              String?
   estimatedHours       Float         @db.Decimal(10,2)
   actualHours          Float         @db.Decimal(10,2)
   cycleTime            Float?
-  leadTime            Float?
+  leadTime             Float?
   assigneeId           Int?
   assignee             User?         @relation("TaskAssignee", fields: [assigneeId], references: [id])
   reporterId           Int?
@@ -345,48 +452,47 @@ model Task {
   originalEstimate     Float?
   remainingEstimate    Float?
   environment          Environment?
-  version              String?
   startDate            DateTime?
   completedAt          DateTime?
   estimatedCompletionDate DateTime?
   weight               Float         @default(1.0)
-  order                Int           @default(0)
+  order                Int          @default(0)
   key                  String
   timeZone             String?
   lastViewedAt         DateTime?
   subscribedUsers      Int[]
-  isFlagged           Boolean        @default(false)
-  isStarred           Boolean        @default(false)
-  reminderSet          Boolean        @default(false)
+  isFlagged           Boolean       @default(false)
+  isStarred           Boolean       @default(false)
+  reminderSet          Boolean       @default(false)
   reminderTime         DateTime?
-  isRecurring          Boolean        @default(false)
-  isDeleted            Boolean        @default(false)
-  deletedAt            DateTime?
-  deletedBy            Int?
-  isBlocked            Boolean        @default(false)
+  isRecurring          Boolean       @default(false)
+  isBlocked            Boolean       @default(false)
 
   // Relations
   customFields         CustomFieldValue[]
-  comments             Comment[]
-  attachments          Attachment[]
-  timeEntries          TimeEntry[]
-  linkedTasks          TaskLink[]
-  activities           TaskActivity[]
-  customStatus         TaskCustomStatus?   @relation(fields: [customStatusId], references: [id])
+  comments             Comment[]         @relation(onDelete: Cascade)
+  attachments          Attachment[]      @relation(onDelete: Cascade)
+  timeEntries          TimeEntry[]       @relation(onDelete: Cascade)
+  linkedTasks          TaskLink[]        @relation(onDelete: Cascade)
+  activities           TaskActivity[]    @relation(onDelete: Cascade)
+  customStatus         TaskCustomStatus? @relation(fields: [customStatusId], references: [id])
   customStatusId       Int?
   recurringPattern     RecurringPattern?
   labels               Label[]
-  dependencies         Dependency[]       @relation("SourceTask")
-  dependentOn          Dependency[]       @relation("TargetTask")
+  dependencies         Dependency[]      @relation("SourceTask")
+  dependentOn          Dependency[]      @relation("TargetTask")
 
-  @@index([assigneeId, statusId])
-  @@index([projectId, statusId])
-  @@index([sprintId, statusId])
+  @@index([assigneeId, statusId, isDeleted])
+  @@index([projectId, statusId, isDeleted])
+  @@index([sprintId, assigneeId, statusId])
+  @@index([epicId, isDeleted])
   @@index([dueDate])
   @@index([createdAt])
-  @@index([isDeleted])
   @@check(estimatedHours >= 0)
   @@check(actualHours >= 0)
+  @@check(progress >= 0 && progress <= 100)
+  @@check(storyPoints >= 0)
+  @@check(weight > 0)
 }
 
 model TaskCustomStatus {
@@ -398,9 +504,14 @@ model TaskCustomStatus {
   description String?
   icon        String?
   order       Int          @default(0)
-  tasks       Task[]
   projectId   Int
   project     Project      @relation(fields: [projectId], references: [id])
+  tasks       Task[]
+  version     Int          @default(1)
+  
+  @@unique([name, projectId])
+  @@index([projectId])
+  @@index([statusId])
 }
 
 model TaskLink {
@@ -409,6 +520,7 @@ model TaskLink {
   task          Task             @relation(fields: [taskId], references: [id])
   linkedTaskId  Int
   relationship  TaskRelationship
+  version       Int              @default(1)
 
   @@index([taskId])
   @@index([linkedTaskId])
@@ -423,32 +535,38 @@ model TaskActivity {
   action    TaskActivityAction
   details   Json?
   createdAt DateTime           @default(now())
+  version   Int                @default(1)
 
   @@index([taskId])
   @@index([userId])
+  @@index([createdAt])
 }
 
 model Comment {
   id              Int          @id @default(autoincrement())
   taskId          Int
-  task            Task         @relation(fields: [taskId], references: [id])
+  task            Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
   userId          Int
   user            User         @relation(fields: [userId], references: [id])
   content         String       @db.Text
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
+  deletedAt       DateTime?
+  deletedBy       Int?
+  isDeleted       Boolean      @default(false)
   mentions        Int[]
   isEdited        Boolean      @default(false)
-  isDeleted       Boolean      @default(false)
   parentCommentId Int?
   parentComment   Comment?     @relation("CommentReplies", fields: [parentCommentId], references: [id])
   childComments   Comment[]    @relation("CommentReplies")
-  attachments     Attachment[]
-  reactions       Reaction[]
+  version         Int          @default(1)
+  attachments     Attachment[] @relation(onDelete: Cascade)
+  reactions       Reaction[]   @relation(onDelete: Cascade)
 
   @@index([taskId])
   @@index([userId])
   @@index([parentCommentId])
+  @@index([isDeleted])
 }
 
 model Attachment {
@@ -459,9 +577,10 @@ model Attachment {
   size          Int
   uploadedBy    Int
   uploadedAt    DateTime  @default(now())
-  isDeleted     Boolean   @default(false)
   deletedAt     DateTime?
   deletedBy     Int?
+  isDeleted     Boolean   @default(false)
+  version       Int       @default(1)
   taskId        Int?
   task          Task?     @relation(fields: [taskId], references: [id])
   commentId     Int?
@@ -469,6 +588,7 @@ model Attachment {
 
   @@index([taskId])
   @@index([commentId])
+  @@index([isDeleted])
 }
 
 model Reaction {
@@ -478,6 +598,7 @@ model Reaction {
   commentId Int
   comment   Comment  @relation(fields: [commentId], references: [id])
   createdAt DateTime @default(now())
+  version   Int      @default(1)
 
   @@index([commentId])
   @@index([userId])
@@ -494,6 +615,7 @@ model RecurringPattern {
   daysOfWeek           Int[]
   monthDay             Int?
   weekNumber           Int?
+  version              Int      @default(1)
 }
 
 model TimeEntry {
@@ -511,9 +633,12 @@ model TimeEntry {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   isRunning   Boolean  @default(false)
+  version     Int      @default(1)
 
   @@index([taskId])
   @@index([userId])
+  @@check(duration >= 0)
+  @@check(endTime > startTime)
 }
 
 model Sprint {
@@ -526,16 +651,20 @@ model Sprint {
   status              SprintStatusType @relation(fields: [statusId], references: [id])
   projectId           Int
   project             Project          @relation(fields: [projectId], references: [id])
-  tasks               Task[]
   createdAt           DateTime         @default(now())
-  createdBy           Int
   updatedAt           DateTime         @updatedAt
-  order               Int              @default(0)
+  deletedAt           DateTime?
+  deletedBy           Int?
   isDeleted           Boolean          @default(false)
+  createdBy           Int
+  order               Int              @default(0)
+  version             Int              @default(1)
   metrics             Json
+  tasks               Task[]
 
   @@index([projectId])
   @@index([statusId])
+  @@index([isDeleted])
   @@check(endDate > startDate)
 }
 
@@ -549,7 +678,6 @@ model Epic {
   targetDate        DateTime
   projectId         Int
   project           Project          @relation(fields: [projectId], references: [id])
-  tasks             Task[]
   progress          Float            @default(0)
   ownerId           Int
   owner             User             @relation(fields: [ownerId], references: [id])
@@ -558,15 +686,22 @@ model Epic {
   priorityOrder     Int              @default(0)
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+  deletedBy         Int?
+  isDeleted         Boolean          @default(false)
+  version           Int              @default(1)
   order             Int              @default(0)
   key               String
-  customFields      CustomFieldValue[]
-  isDeleted         Boolean          @default(false)
   dependencies      Int[]
+  customFields      CustomFieldValue[]
+  tasks             Task[]
 
   @@index([projectId])
   @@index([statusId])
   @@index([ownerId])
+  @@index([isDeleted])
+  @@check(progress >= 0 && progress <= 100)
+  @@check(targetDate > startDate)
 }
 
 model Project {
@@ -582,27 +717,31 @@ model Project {
   status              ProjectStatusType @relation(fields: [statusId], references: [id])
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
+  deletedAt           DateTime?
+  deletedBy           Int?
+  isDeleted           Boolean           @default(false)
+  isArchived          Boolean           @default(false)
+  archivedAt          DateTime?
+  archivedBy          Int?
+  version             Int               @default(1)
   startDate           DateTime
   endDate             DateTime?
   ownerId             Int
   owner               User              @relation(fields: [ownerId], references: [id])
   team                TeamMember[]
-  epics               Epic[]
-  sprints             Sprint[]
-  tasks               Task[]
+  epics               Epic[]            @relation(onDelete: Cascade)
+  sprints             Sprint[]          @relation(onDelete: Cascade)
+  tasks               Task[]            @relation(onDelete: Cascade)
   tags                String[]
   customFields        CustomFieldValue[]
   settings            Json
   budget              Json?
-  milestones          Milestone[]
-  risks               Risk[]
+  milestones          Milestone[]       @relation(onDelete: Cascade)
+  risks               Risk[]            @relation(onDelete: Cascade)
   customStatuses      TaskCustomStatus[]
-  integrations        Integration[]
-  automations         Automation[]
+  integrations        Integration[]     @relation(onDelete: Cascade)
+  automations         Automation[]      @relation(onDelete: Cascade)
   isTemplate          Boolean           @default(false)
-  isDeleted           Boolean           @default(false)
-  deletedAt           DateTime?
-  deletedBy           Int?
   teams               Team[]
   labels              Label[]
   metrics             ProjectMetrics?
@@ -611,45 +750,56 @@ model Project {
   @@index([statusId])
   @@index([department])
   @@index([isDeleted])
+  @@index([isArchived])
 }
 
 model ProjectMetrics {
   id                Int      @id @default(autoincrement())
   projectId         Int      @unique
   project           Project  @relation(fields: [projectId], references: [id])
-  
   velocityData      Json     
   cycleTimeAvg      Float
   leadTimeAvg       Float
   throughput        Float
   qualityMetrics    Json     
-  
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  version           Int      @default(1)
+
+  @@check(cycleTimeAvg >= 0)
+  @@check(leadTimeAvg >= 0)
+  @@check(throughput >= 0)
 }
 
 model Team {
-  id          Int      @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   name        String
   description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+  deletedBy   Int?
+  isDeleted   Boolean      @default(false)
+  version     Int          @default(1)
   members     TeamMember[]
   projects    Project[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+
+  @@index([isDeleted])
 }
 
 model TeamMember {
-  id            Int      @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
   userId        Int
-  user          User     @relation(fields: [userId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
   teamId        Int
-  team          Team     @relation(fields: [teamId], references: [id])
+  team          Team      @relation(fields: [teamId], references: [id])
   projectId     Int?
-  project       Project? @relation(fields: [projectId], references: [id])
+  project       Project?  @relation(fields: [projectId], references: [id])
   role          String
   permissions   String[]
-  joinedAt      DateTime @default(now())
+  joinedAt      DateTime  @default(now())
   lastActiveAt  DateTime?
+  version       Int       @default(1)
 
   @@unique([userId, teamId, projectId])
   @@index([userId])
@@ -658,16 +808,17 @@ model TeamMember {
 }
 
 model CustomField {
-  id          Int                   @id @default(autoincrement())
-  name        String
-  type        CustomFieldType
-  options     String[]
-  required    Boolean               @default(false)
-  entityType  CustomFieldEntityType
-  defaultValue Json?
-  order       Int                   @default(0)
-  isActive    Boolean               @default(true)
-  values      CustomFieldValue[]
+  id            Int                   @id @default(autoincrement())
+  name          String
+  type          CustomFieldType
+  options       String[]
+  required      Boolean               @default(false)
+  entityType    CustomFieldEntityType
+  defaultValue  Json?
+  order         Int                   @default(0)
+  isActive      Boolean               @default(true)
+  version       Int                   @default(1)
+  values        CustomFieldValue[]
 }
 
 model CustomFieldValue {
@@ -681,6 +832,7 @@ model CustomFieldValue {
   project       Project?     @relation(fields: [projectId], references: [id])
   epicId        Int?
   epic          Epic?        @relation(fields: [epicId], references: [id])
+  version       Int          @default(1)
 
   @@index([fieldId])
   @@index([taskId])
@@ -690,7 +842,7 @@ model CustomFieldValue {
 
 model Label {
   id          Int       @id @default(autoincrement())
-  name        String    @unique
+  name        String
   color       String
   description String?
   projectId   Int?
@@ -698,14 +850,20 @@ model Label {
   tasks       Task[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  deletedBy   Int?
+  isDeleted   Boolean   @default(false)
+  version     Int       @default(1)
 
+  @@unique([name, projectId])
   @@index([projectId])
+  @@index([isDeleted])
 }
 
 model Milestone {
-  id          Int                  @id @default(autoincrement())
+  id          Int                   @id @default(autoincrement())
   name        String
-  description String?              @db.Text
+  description String?               @db.Text
   dueDate     DateTime
   statusId    Int
   status      MilestoneStatusType  @relation(fields: [statusId], references: [id])
@@ -720,11 +878,17 @@ model Milestone {
   project     Project              @relation(fields: [projectId], references: [id])
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
+  deletedAt   DateTime?
+  deletedBy   Int?
   isDeleted   Boolean              @default(false)
+  version     Int                  @default(1)
 
   @@index([projectId])
   @@index([statusId])
   @@index([ownerId])
+  @@index([isDeleted])
+  @@check(progress >= 0 && progress <= 100)
+  @@check(actualCost >= 0)
 }
 
 model Risk {
@@ -743,23 +907,37 @@ model Risk {
   project         Project         @relation(fields: [projectId], references: [id])
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
+  deletedBy       Int?
+  isDeleted       Boolean         @default(false)
+  version         Int             @default(1)
 
   @@index([projectId])
   @@index([ownerId])
   @@index([statusId])
+  @@index([isDeleted])
 }
 
 model Integration {
   id          Int               @id @default(autoincrement())
   type        String
-  config      Json              // Storing IntegrationConfig as JSON
+  config      Json              // Storing configuration as JSON
   status      IntegrationStatus
   lastSyncAt  DateTime?
   errors      String[]
   projectId   Int
   project     Project          @relation(fields: [projectId], references: [id])
+  version     Int              @default(1)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+  deletedBy   Int?
+  isDeleted   Boolean          @default(false)
 
   @@index([projectId])
+  @@index([type])
+  @@index([status])
+  @@index([isDeleted])
 }
 
 model Automation {
@@ -770,13 +948,20 @@ model Automation {
   actions     Json      // Storing actions as JSON
   isActive    Boolean   @default(true)
   createdBy   Int
+  createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   lastRunAt   DateTime?
   runCount    Int       @default(0)
   projectId   Int
   project     Project   @relation(fields: [projectId], references: [id])
+  version     Int       @default(1)
+  deletedAt   DateTime?
+  deletedBy   Int?
+  isDeleted   Boolean   @default(false)
 
   @@index([projectId])
+  @@index([isActive])
+  @@index([isDeleted])
 }
 
 model Dependency {
@@ -788,6 +973,7 @@ model Dependency {
   type            String   
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  version         Int      @default(1)
 
   @@unique([sourceTaskId, targetTaskId])
   @@index([sourceTaskId])
@@ -802,7 +988,11 @@ model AuditLog {
   user        User     @relation(fields: [userId], references: [id])
   action      String
   changes     Json
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?    // Additional context
   createdAt   DateTime @default(now())
+  version     Int      @default(1)
   
   @@index([entityType, entityId])
   @@index([userId])
